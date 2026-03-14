@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "KoSurveyor proxy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Proxies KoboToolbox API requests through the extension to bypass CORS. Configurable Kobo server URL.",
 
   "permissions": [

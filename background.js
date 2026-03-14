@@ -64,3 +64,40 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   return true // Keep message channel open for async sendResponse
 })
+
+// ── Handle permission requests from the content script ──────────────────────
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'request-kobo-permission') {
+    const { origin } = message;
+    
+    // chrome.permissions.request must be triggered by a user gesture.
+    // The message sent from the content script (triggered by the app click)
+    // counts as a valid gesture in modern Chrome.
+    chrome.permissions.request({
+      origins: [`${origin}/*`]
+    }, (granted) => {
+      sendResponse({ granted });
+    });
+    return true; // Keep channel open for async response
+  }
+});
+// ── Validate a Kobo server URL by pinging its API ───────────────────────────
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type !== 'kobo-validate-server') return false;
+
+  const { origin } = message;
+
+  fetch(`${origin}/api/v2/?format=json`)
+    .then((res) => {
+      if (res.status === 404) {
+        sendResponse({ valid: false, error: 'No KoboToolbox API found at this address.' });
+      } else {
+        sendResponse({ valid: true });
+      }
+    })
+    .catch(() => {
+      sendResponse({ valid: false, error: 'Could not connect to the server. Check the URL.' });
+    });
+
+  return true; // Keep channel open for async response
+});

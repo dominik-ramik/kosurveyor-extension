@@ -70,3 +70,94 @@ window.addEventListener('kosurveyor-request', (event) => {
     }))
   }
 })
+
+// ── 1. Listen for "Read from extension" (App -> Extension) ──────────────────
+window.addEventListener('kosurveyor-get-origin', () => {
+  chrome.storage.sync.get({ koboServerUrl: DEFAULT_KOBO_SERVER }, (items) => {
+    window.dispatchEvent(new CustomEvent('kosurveyor-origin', {
+      detail: { origin: items.koboServerUrl }
+    }));
+  });
+});
+
+// ── 2. Listen for "Apply" (App -> Extension) ───────────────────────────────
+window.addEventListener('kosurveyor-set-origin', async (event) => {
+  const { url } = event.detail;
+  if (!url) return;
+
+  let origin;
+  try {
+    origin = new URL(url).origin;
+  } catch (e) {
+    window.dispatchEvent(new CustomEvent('kosurveyor-set-origin-status', {
+      detail: { success: false, error: 'Invalid URL format' }
+    }));
+    return;
+  }
+
+  if (!origin.startsWith('https://')) {
+    window.dispatchEvent(new CustomEvent('kosurveyor-set-origin-status', {
+      detail: { success: false, error: 'URL must use HTTPS.' }
+    }));
+    return;
+  }
+
+  const isDefault = (origin === 'https://kf.kobotoolbox.org');
+
+  try {
+    // Request permission via the background script (since content scripts can't)
+    if (!isDefault) {
+      chrome.runtime.sendMessage({ type: 'request-kobo-permission', origin }, (response) => {
+        if (!response?.granted) {
+          window.dispatchEvent(new CustomEvent('kosurveyor-set-origin-status', {
+            detail: { success: false, error: 'Permission denied by user' }
+          }));
+          return;
+        }
+        validateAndSaveOrigin(origin);
+      });
+    } else {
+      validateAndSaveOrigin(origin);
+    }
+  } catch (error) {
+    window.dispatchEvent(new CustomEvent('kosurveyor-set-origin-status', {
+      detail: { success: false, error: error.message }
+    }));
+  }
+});
+
+function validateAndSaveOrigin(origin) {
+  // Test the connection by pinging the KoboToolbox API via the background script
+  chrome.runtime.sendMessage({ type: 'kobo-validate-server', origin }, (result) => {
+    if (chrome.runtime.lastError) {
+      window.dispatchEvent(new CustomEvent('kosurveyor-set-origin-status', {
+        detail: { success: false, error: chrome.runtime.lastError.message }
+      }));
+      return;
+    }
+    if (!result?.valid) {
+      window.dispatchEvent(new CustomEvent('kosurveyor-set-origin-status', {
+        detail: { success: false, error: result?.error || 'Server validation failed.' }
+      }));
+      return;
+    }
+    saveOriginToStorage(origin);
+  });
+}
+
+function saveOriginToStorage(origin) {
+  chrome.storage.sync.set({ koboServerUrl: origin }, () => {
+    if (chrome.runtime.lastError) {
+      window.dispatchEvent(new CustomEvent('kosurveyor-set-origin-status', {
+        detail: { success: false, error: chrome.runtime.lastError.message }
+      }));
+    } else {
+      // Notify the app that it was successful
+      window.dispatchEvent(new CustomEvent('kosurveyor-set-origin-status', {
+        detail: { success: true, origin: origin }
+      }));
+      // Note: chrome.storage.onChanged in this same file will automatically 
+      // fire 'kosurveyor-init' to update content-main.js
+    }
+  });
+}
