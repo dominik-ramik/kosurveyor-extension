@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>KoSurveyor - Settings</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      font-size: 14px;
+      padding: 20px 24px;
+      max-width: 480px;
+      color: #222;
+    }
+
+    h2 {
+      margin: 0 0 4px;
+      font-size: 16px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin: 0 0 20px;
+      font-size: 13px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input[type="url"] {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    input[type="url"]:focus {
+      outline: 2px solid #009688;
+      border-color: #009688;
+    }
+
+    .hint {
+      color: #666;
+      font-size: 12px;
+      margin: 6px 0 16px;
+    }
+
+    button {
+      background: #009688;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #00796b;
+    }
+
+    #status {
+      margin-top: 14px;
+      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    #status.ok {
+      background: #e8f5e9;
+      color: #2e7d32;
+      display: block;
+    }
+
+    #status.error {
+      background: #fdecea;
+      color: #c62828;
+      display: block;
+    }
+
+    .permission-note {
+      margin-top: 20px;
+      padding: 10px 12px;
+      background: #fff8e1;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #5d4037;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>KoSurveyor KoboToolbox proxy</h2>
+  <p class="subtitle">Configure which KoboToolbox server this extension proxies requests for.</p>
+
+  <label for="serverUrl">Kobo server URL</label>
+  <input type="url" id="serverUrl" placeholder="https://kf.kobotoolbox.org" />
+  <p class="hint">
+    Default: <code>https://kf.kobotoolbox.org</code><br>
+    Change this only if your team uses a self-hosted KoboToolbox instance.
+    No trailing slash.
+  </p>
+
+  <button id="saveBtn">Save</button>
+
+  <div id="status"></div>
+  <div class="permission-note" id="permNote">
+    A browser permission prompt will appear to allow the extension to access
+    the new server. You must accept it for the extension to work. The extension doesn't store or share any data. Its
+    sole purpose is to proxy requests from the KoSurveyor web app to the KoboToolbox API, bypassing the browser's CORS
+    restrictions. You can review the extension's source code on <a href="https://github.com/kobotoolbox/kosurveyor"
+      target="_blank">GitHub</a>.
+  </div>
+
+  <script src="options.js"></script>
+</body>
+
+</html>
