@@ -54,12 +54,6 @@ When a non-default server is entered, Chrome will prompt for permission to acces
 
 Google Chrome and Microsoft Edge (Chromium-based). Firefox and Safari are **not** supported due to Manifest V3 and API differences.
 
-## Security
-
-- The extension only proxies requests whose origin matches the configured KoboToolbox server URL — all other requests are ignored.
-- No credentials are stored by the extension. Authentication headers are forwarded as-is from the web app and exist only in transit.
-- The extension's content scripts run only on `https://kosurveyor.netlify.app` and `localhost` (for development).
-
 ## License
 
 CC BY-SA 4.0
