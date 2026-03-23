@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "KoSurveyor proxy",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A companion extension for the KoSurveyor app ( https://kosurveyor.netlify.app/ ). Proxies KoboToolbox API requests through the extension to allow working directly from the front-end bypassing CORS. Configurable Kobo server URL.",
   "permissions": [
     "storage"
